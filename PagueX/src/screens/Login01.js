@@ -33,6 +33,7 @@ const Login01 = ({ navigation }) => {
         />
         <Button title="Enviar" onPress={handleSubmit} />
       </View>
+      
     </View>
   );
 };
