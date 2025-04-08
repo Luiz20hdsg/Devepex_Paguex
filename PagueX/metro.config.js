@@ -1,6 +1,10 @@
+// metro.config.js
 const { getDefaultConfig } = require('expo/metro-config');
 
-module.exports = (async () => {
-  const config = await getDefaultConfig(__dirname);
-  return config;
-})();
+const config = getDefaultConfig(__dirname);
+config.server = {
+  ...config.server,
+  experimentalImportBundleSupport: false,
+};
+
+module.exports = config;

@@ -14,13 +14,23 @@ const Login02 = ({ navigation }) => {
   const handleVerify = async () => {
     const email = await getData('email');
     if (!code || !email) return alert('Código ou e-mail inválido');
-    const userData = await verifyAuthCode(email, code);
-    if (userData) {
-      const deviceId = await getDeviceId();
-      await saveData('device_id', deviceId);
-      await registerDevice(email, deviceId);
-      navigation.navigate('MessageList');
-    } else {
+    
+    try {
+      const authData = await verifyAuthCode(email, code);
+      if (authData) {
+        const deviceId = await getDeviceId();
+        await saveData('device_id', deviceId);
+        await saveData('auth_tokens', JSON.stringify(authData)); // Salva tokens
+        
+        
+        await axios.post('https://api.paguex.com/auth', {
+          email,
+          device_ID: deviceId
+        });
+        
+        navigation.navigate('MessageList');
+      }
+    } catch (error) {
       alert('Código inválido ou expirado');
     }
   };

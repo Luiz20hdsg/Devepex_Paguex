@@ -11,11 +11,14 @@ const Login01 = ({ navigation }) => {
 
   const handleSubmit = async () => {
     if (!email || !/\S+@\S+\.\S+/.test(email)) return alert('Digite um e-mail válido');
-    const success = await sendAuthCode(email);
-    if (success) {
-      await saveData('email', email);
-      navigation.navigate('Login02');
-    } else {
+    
+    try {
+      const success = await sendAuthCode(email);
+      if (success) {
+        await saveData('email', email);
+        navigation.navigate('Login02');
+      }
+    } catch (error) {
       alert('Erro ao enviar código. Tente novamente.');
     }
   };

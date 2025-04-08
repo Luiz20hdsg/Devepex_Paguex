@@ -1,35 +1,42 @@
+// src/services/auth.js
+import { Auth0 } from 'react-native-auth0';
 import axios from 'axios';
-import { EXPO_PUBLIC_FIREBASE_API_KEY } from '@env';
+
+const auth0 = new Auth0({
+  domain: process.env.EXPO_PUBLIC_AUTH0_DOMAIN,
+  clientId: process.env.EXPO_PUBLIC_AUTH0_CLIENT_ID
+});
 
 export const sendAuthCode = async (email) => {
   try {
-    const response = await axios.post(
-      `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${EXPO_PUBLIC_FIREBASE_API_KEY}`,
-      {
-        requestType: 'EMAIL_SIGNIN',
-        email,
-        continueUrl: 'https://dashboard.paguex.com/login', 
-      }
-    );
-    return response.status === 200;
+    await auth0.auth.passwordlessWithEmail({
+      email,
+      send: 'code', // Envia código numérico
+      authParams: { scope: 'openid profile email' }
+    });
+    return true;
   } catch (error) {
-    console.error('Erro ao enviar código:', error.response?.data || error.message);
+    console.error('Erro ao enviar código:', error);
     return false;
   }
 };
 
-export const verifyAuthCode = async (email, oobCode) => {
+export const verifyAuthCode = async (email, code) => {
   try {
-    const response = await axios.post(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithEmailLink?key=${EXPO_PUBLIC_FIREBASE_API_KEY}`,
-      {
-        email,
-        oobCode,
-      }
-    );
-    return response.data; 
+    const credentials = await auth0.auth.loginWithEmail({
+      email,
+      code,
+      audience: 'https://api.paguex.com',
+      scope: 'openid profile email'
+    });
+    
+    return {
+      idToken: credentials.idToken,
+      accessToken: credentials.accessToken,
+      user: credentials.user
+    };
   } catch (error) {
-    console.error('Erro ao verificar código:', error.response?.data || error.message);
+    console.error('Erro ao verificar código:', error);
     return null;
   }
 };
