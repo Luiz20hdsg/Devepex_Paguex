@@ -16,7 +16,7 @@ const Login01 = ({ navigation }) => {
       await saveData('email', email);
       navigation.navigate('Login02');
     } else {
-      alert('Erro ao enviar código. Tente novamente.');
+      alert('Erro ao enviar código. Verifique o e-mail e tente novamente.');
     }
   };
 
@@ -33,7 +33,6 @@ const Login01 = ({ navigation }) => {
         />
         <Button title="Enviar" onPress={handleSubmit} />
       </View>
-      
     </View>
   );
 };

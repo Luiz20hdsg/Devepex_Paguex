@@ -1,35 +1,37 @@
-import axios from 'axios';
-import { EXPO_PUBLIC_FIREBASE_API_KEY } from '@env';
+import { createClient } from '@supabase/supabase-js';
+import { EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY } from '@env';
+
+const supabase = createClient(EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY);
 
 export const sendAuthCode = async (email) => {
   try {
-    const response = await axios.post(
-      `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${EXPO_PUBLIC_FIREBASE_API_KEY}`,
-      {
-        requestType: 'EMAIL_SIGNIN',
-        email,
-        continueUrl: 'https://dashboard.paguex.com/login', 
-      }
-    );
-    return response.status === 200;
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: 'https://dashboard.paguex.com/login', 
+      },
+    });
+    if (error) throw error;
+    console.log('Código enviado com sucesso para:', email);
+    return true;
   } catch (error) {
-    console.error('Erro ao enviar código:', error.response?.data || error.message);
+    console.error('Erro ao enviar código:', error.message);
     return false;
   }
 };
 
-export const verifyAuthCode = async (email, oobCode) => {
+export const verifyAuthCode = async (email, token) => {
   try {
-    const response = await axios.post(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithEmailLink?key=${EXPO_PUBLIC_FIREBASE_API_KEY}`,
-      {
-        email,
-        oobCode,
-      }
-    );
-    return response.data; 
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email',
+    });
+    if (error) throw error;
+    console.log('Autenticação bem-sucedida:', data);
+    return data.session; // Retorna a sessão com access_token
   } catch (error) {
-    console.error('Erro ao verificar código:', error.response?.data || error.message);
+    console.error('Erro ao verificar código:', error.message);
     return null;
   }
 };

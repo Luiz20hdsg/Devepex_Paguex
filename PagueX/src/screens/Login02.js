@@ -14,10 +14,11 @@ const Login02 = ({ navigation }) => {
   const handleVerify = async () => {
     const email = await getData('email');
     if (!code || !email) return alert('Código ou e-mail inválido');
-    const userData = await verifyAuthCode(email, code);
-    if (userData) {
+    const session = await verifyAuthCode(email, code);
+    if (session) {
       const deviceId = await getDeviceId();
       await saveData('device_id', deviceId);
+      await saveData('email', email); // Já salvo, mas mantido para consistência
       await registerDevice(email, deviceId);
       navigation.navigate('MessageList');
     } else {
@@ -30,7 +31,12 @@ const Login02 = ({ navigation }) => {
       <Image source={require('../assets/logo.png')} style={globalStyles.logo} />
       <Text style={styles.text}>Informe o código recebido por e-mail</Text>
       <View style={styles.inputContainer}>
-        <Input value={code} onChangeText={setCode} placeholder="Código" />
+        <Input
+          value={code}
+          onChangeText={setCode}
+          placeholder="Código (ex.: 123456)"
+          keyboardType="numeric" // Para facilitar entrada de números
+        />
         <Button title="Validar o código" onPress={handleVerify} />
       </View>
     </View>
