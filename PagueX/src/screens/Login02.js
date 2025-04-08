@@ -18,8 +18,12 @@ const Login02 = ({ navigation }) => {
     if (session) {
       const deviceId = await getDeviceId();
       await saveData('device_id', deviceId);
-      await saveData('email', email); // Já salvo, mas mantido para consistência
-      await registerDevice(email, deviceId);
+      await saveData('email', email);
+      try {
+        await registerDevice(email, deviceId);
+      } catch (error) {
+        console.error('Erro ao registrar dispositivo ignorado:', error.message);
+      }
       navigation.navigate('MessageList');
     } else {
       alert('Código inválido ou expirado');
@@ -35,7 +39,7 @@ const Login02 = ({ navigation }) => {
           value={code}
           onChangeText={setCode}
           placeholder="Código (ex.: 123456)"
-          keyboardType="numeric" // Para facilitar entrada de números
+          keyboardType="numeric"
         />
         <Button title="Validar o código" onPress={handleVerify} />
       </View>

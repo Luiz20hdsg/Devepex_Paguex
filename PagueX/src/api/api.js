@@ -4,13 +4,17 @@ const api = axios.create({
   baseURL: 'https://api.paguex.com',
 });
 
+const API_BASE_URL = 'https://api.paguex.com'; 
+
 export const registerDevice = async (email, deviceId) => {
   try {
-    const response = await api.post('/auth', { email, device_id: deviceId });
-    return response.data;
+    const response = await axios.post(`${API_BASE_URL}/auth`, {
+      email,
+      device_ID: deviceId,
+    });
+    console.log('Dispositivo registrado com sucesso:', response.data);
   } catch (error) {
-    console.error('Erro ao registrar dispositivo:', error);
-    throw error;
+    throw new Error(`Erro ao registrar dispositivo: ${error.message}`);
   }
 };
 
