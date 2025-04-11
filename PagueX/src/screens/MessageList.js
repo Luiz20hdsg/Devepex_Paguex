@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import MessageItem from '../components/MessageItem';
-import Button from '../components/Button';
 import { getMessages } from '../api/api';
 import { getData } from '../services/storage';
 import { globalStyles } from '../styles/globalStyles';
@@ -46,32 +45,30 @@ const MessageList = ({ navigation }) => {
 
   return (
     <View style={globalStyles.container}>
-      {/* Título com ícone de notificação à esquerda */}
-      <View style={styles.headerContainer}>
-        <Icon
-          name="notifications"
-          size={24}
-          color="#FFFFFF"
-          style={styles.headerIcon}
-        />
-        <Text style={styles.title}>Lista de mensagens</Text>
+      <View style={styles.header}>
+        <View style={styles.iconContainer}>
+          <Icon name="notifications" size={24} color="#FFFFFF" />
+        </View>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Lista de mensagens</Text>
+        </View>
       </View>
 
-      {/* Switch selector para "Hoje" e "7 dias" */}
       <View style={styles.filterContainer}>
-        <Button
-          title="Hoje"
-          onPress={() => handleRangeChange(1)}
+        <TouchableOpacity
           style={[styles.filter, range === 1 ? styles.activeFilter : null]}
-        />
-        <Button
-          title="7 dias"
-          onPress={() => handleRangeChange(7)}
+          onPress={() => handleRangeChange(1)}
+        >
+          <Text style={range === 1 ? styles.activeFilterText : styles.filterText}>Hoje</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           style={[styles.filter, range === 7 ? styles.activeFilter : null]}
-        />
+          onPress={() => handleRangeChange(7)}
+        >
+          <Text style={range === 7 ? styles.activeFilterText : styles.filterText}>7 dias</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Lista de mensagens */}
       <FlatList
         data={messages}
         renderItem={({ item }) => (
@@ -89,40 +86,44 @@ const MessageList = ({ navigation }) => {
         contentContainerStyle={styles.messageList}
         ListFooterComponent={
           hasNextPage ? (
-            <Button
+            <TouchableOpacity
               title="Mais..."
               onPress={loadMore}
               style={styles.loadMoreButton}
-            />
+            >
+              <Text style={styles.loadMoreButtonText}>Mais...</Text>
+            </TouchableOpacity>
           ) : null
         }
       />
 
-      {/* Rodapé */}
       <View style={styles.footer}>
         <Image source={require('../assets/sublogo01.png')} style={styles.sublogo} />
         <View style={styles.footerIcons}>
-          <Icon
-            name="notifications"
-            size={24}
-            color="#1E1E1E"
-            style={[styles.footerButton, { backgroundColor: '#A1C014' }]} // Tela atual
-            onPress={() => navigation.navigate('MessageList')}
-          />
-          <Icon
-            name="menu"
-            size={24}
-            color="#FFFFFF"
-            style={styles.footerButton}
-            onPress={() => navigation.navigate('Menu')}
-          />
-          <Icon
-            name="settings"
-            size={24}
-            color="#FFFFFF"
-            style={styles.footerButton}
-            onPress={() => navigation.navigate('Settings')}
-          />
+          <View style={[styles.footerButton, { backgroundColor: '#A1C014' }]}>
+            <Icon
+              name="notifications"
+              size={22}
+              color="#1E1E1E"
+              onPress={() => navigation.navigate('MessageList')}
+            />
+          </View>
+          <View style={styles.footerButton}>
+            <Icon
+              name="menu"
+              size={22}
+              color="#FFFFFF"
+              onPress={() => navigation.navigate('Menu')}
+            />
+          </View>
+          <View style={styles.footerButton}>
+            <Icon
+              name="settings"
+              size={22}
+              color="#FFFFFF"
+              onPress={() => navigation.navigate('Settings')}
+            />
+          </View>
         </View>
       </View>
     </View>
@@ -130,55 +131,56 @@ const MessageList = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  headerContainer: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 33.78,
+    marginVertical: 10,
   },
-  headerIcon: {
-    width: 45,
+  iconContainer: {
+    width: 40,
     height: 40,
-    backgroundColor: '#212121',
-    borderWidth: 1,
+    backgroundColor: '#2E2E2E',
     borderColor: '#FFFFFF',
+    borderWidth: 1,
     borderRadius: 8,
-    textAlign: 'center',
-    lineHeight: 40,
-    position: 'absolute',
-    left: 41.25 - 45 - 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  titleContainer: {
+    marginLeft: 10,
   },
   title: {
     ...globalStyles.text,
     fontSize: 20,
     fontWeight: '700',
-    textAlign: 'center',
-    marginVertical: 10,
   },
   filterContainer: {
     flexDirection: 'row',
-    alignSelf: 'flex-start',
-    marginLeft: 41.25 - 45 - 10,
+    marginLeft: 10,
     gap: 6,
     marginVertical: 10,
   },
   filter: {
-    backgroundColor: '#212121', // Cor da tela
+    width: 70,
+    height: 30,
     borderWidth: 1,
     borderColor: '#FFFFFF',
     borderRadius: 12,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    width: 70,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#2E2E2E',
   },
   activeFilter: {
-    backgroundColor: '#FFFFFF', // Branco quando ativo
-    borderWidth: 1,
-    borderColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    width: 70,
+    backgroundColor: '#FFFFFF',
+  },
+  filterText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  activeFilterText: {
+    color: '#2E2E2E',
+    fontSize: 16,
   },
   messageList: {
     paddingBottom: 100,
@@ -194,36 +196,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignSelf: 'center',
     marginVertical: 20,
-    shadowColor: '#101828',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+  },
+  loadMoreButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    textAlign: 'center',
   },
   footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 77,
+    height: 80,
     backgroundColor: '#2E2E2E',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   sublogo: {
     width: 45,
     height: 40,
-    marginLeft: 40.75,
     resizeMode: 'contain',
   },
   footerIcons: {
     flexDirection: 'row',
-    gap: 6,
-    paddingRight: 20,
+    gap: 10,
   },
   footerButton: {
-    width: 45,
-    height: 40,
+    width: 55,
+    height: 55,
     backgroundColor: '#2E2E2E',
     borderWidth: 1,
     borderColor: '#FFFFFF',

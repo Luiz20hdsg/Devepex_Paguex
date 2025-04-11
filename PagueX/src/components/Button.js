@@ -2,10 +2,19 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 const Button = ({ title, onPress, style }) => {
-  const isActive = style && style.backgroundColor === '#FFFFFF'; 
+  const isGreenBackground = style && style.backgroundColor === '#A1C014'; // Detecta fundo #A1C014
+  const isWhiteBackground = style && style.backgroundColor === '#FFFFFF'; // Detecta fundo branco
   return (
     <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
-      <Text style={[styles.text, isActive ? styles.activeText : null]}>{title}</Text>
+      <Text
+        style={[
+          styles.text,
+          isGreenBackground ? styles.blackText : null,
+          isWhiteBackground ? styles.darkText : null,
+        ]}
+      >
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -16,11 +25,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    color: '#FFFFFF',
+    color: '#FFFFFF', // Padrão: texto branco
     fontSize: 16,
   },
-  activeText: {
-    color: '#000000', 
+  blackText: {
+    color: '#000000', // Texto preto para fundo #A1C014
+  },
+  darkText: {
+    color: '#2E2E2E', // Texto #2E2E2E para fundo branco (usado em MessageList)
   },
 });
 

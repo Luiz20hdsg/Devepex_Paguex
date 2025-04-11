@@ -21,27 +21,30 @@ const Menu = ({ navigation }) => {
       <View style={styles.footer}>
         <Image source={require('../assets/sublogo01.png')} style={styles.sublogo} />
         <View style={styles.footerIcons}>
-          <Icon
-            name="notifications"
-            size={24}
-            color="#FFFFFF"
-            style={styles.footerButton}
-            onPress={() => navigation.navigate('MessageList')}
-          />
-          <Icon
-            name="menu"
-            size={24}
-            color="#1E1E1E"
-            style={[styles.footerButton, { backgroundColor: '#A1C014' }]} // Tela atual
-            onPress={() => navigation.navigate('Menu')}
-          />
-          <Icon
-            name="settings"
-            size={24}
-            color="#FFFFFF"
-            style={styles.footerButton}
-            onPress={() => navigation.navigate('Settings')}
-          />
+          <View style={styles.footerButton}>
+            <Icon
+              name="notifications"
+              size={22}
+              color="#FFFFFF"
+              onPress={() => navigation.navigate('MessageList')}
+            />
+          </View>
+          <View style={[styles.footerButton, { backgroundColor: '#A1C014' }]}>
+            <Icon
+              name="menu"
+              size={22}
+              color="#1E1E1E"
+              onPress={() => navigation.navigate('Menu')}
+            />
+          </View>
+          <View style={styles.footerButton}>
+            <Icon
+              name="settings"
+              size={22}
+              color="#FFFFFF"
+              onPress={() => navigation.navigate('Settings')}
+            />
+          </View>
         </View>
       </View>
     </View>
@@ -57,26 +60,25 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 77,
+    height: 80,
     backgroundColor: '#2E2E2E',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   sublogo: {
     width: 45,
     height: 40,
-    marginLeft: 40.75,
     resizeMode: 'contain',
   },
   footerIcons: {
     flexDirection: 'row',
-    gap: 6,
-    paddingRight: 20,
+    gap: 10,
   },
   footerButton: {
-    width: 45,
-    height: 40,
+    width: 55,
+    height: 55,
     backgroundColor: '#2E2E2E',
     borderWidth: 1,
     borderColor: '#FFFFFF',
