@@ -8,7 +8,7 @@ const Menu = ({ navigation }) => {
   return (
     <View style={globalStyles.container}>
       <WebView
-        source={{ uri: 'https://dashboard.paguex.com/login' }}
+        source={{ uri: 'http://app.inpagamentos.com' }}
         style={styles.webview}
         javaScriptEnabled={true}
         domStorageEnabled={true}

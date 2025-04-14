@@ -4,7 +4,7 @@ import * as Linking from 'expo-linking';
 
 const supabase = createClient(EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY);
 
-// Prefixo para deep linking
+// mudar isso depois 
 const linkingPrefix = Linking.createURL('/');
 
 export const sendAuthCode = async (email) => {
@@ -12,7 +12,7 @@ export const sendAuthCode = async (email) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${linkingPrefix}auth/verify`, // Link para redirecionar ao app
+        emailRedirectTo: `${linkingPrefix}auth/verify`, // não iremos utilizar mais o link direto
       },
     });
     if (error) throw error;
@@ -33,20 +33,20 @@ export const verifyAuthCode = async (email, token) => {
     });
     if (error) throw error;
     console.log('Autenticação bem-sucedida:', data);
-    return data.session; // Retorna a sessão com access_token
+    return data.session; // retorna a sessão com access_token
   } catch (error) {
     console.error('Erro ao verificar código:', error.message);
     return null;
   }
 };
 
-// Função para verificar autenticação via link
+// função para verificar autenticação via link
 export const handleDeepLinkAuth = async (url) => {
   try {
     const { data, error } = await supabase.auth.getSessionFromUrl(url);
     if (error) throw error;
     console.log('Autenticação via link bem-sucedida:', data);
-    return data.session; // Retorna a sessão autenticada
+    return data.session; 
   } catch (error) {
     console.error('Erro ao autenticar via link:', error.message);
     return null;

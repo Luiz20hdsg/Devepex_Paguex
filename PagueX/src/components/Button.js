@@ -25,14 +25,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    color: '#FFFFFF', // Padrão: texto branco
+    color: '#FFFFFF', 
     fontSize: 16,
   },
   blackText: {
-    color: '#000000', // Texto preto para fundo #A1C014
+    color: '#000000', 
   },
   darkText: {
-    color: '#2E2E2E', // Texto #2E2E2E para fundo branco (usado em MessageList)
+    color: '#2E2E2E', 
   },
 });
 
