@@ -1,33 +1,48 @@
 import React from 'react';
-import { TouchableOpacity, Text } from 'react-native';
-import { markMessageAsRead } from '../api/api';
-import { globalStyles } from '../styles/globalStyles';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const MessageItem = ({ message, onUpdate }) => {
-  const handlePress = async () => {
-    if (!message.readed) {
-      await markMessageAsRead(message.id);
-      onUpdate();
-    }
-  };
-
   return (
-    <TouchableOpacity onPress={handlePress} style={styles.container}>
-      <Text style={[globalStyles.text, { fontWeight: message.readed ? 'normal' : 'bold' }]}>
-        {message.title}
-      </Text>
-      <Text style={globalStyles.text}>{message.message}</Text>
-      <Text style={globalStyles.text}>{message.date}</Text>
-    </TouchableOpacity>
+    <View style={styles.container}>
+      <Text style={styles.title}>{message.title}</Text>
+      <Text style={styles.message}>{message.message}</Text>
+      <TouchableOpacity
+        style={[styles.readCircle, message.readed ? styles.readCircleActive : null]}
+        onPress={onUpdate}
+      />
+    </View>
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
     padding: 10,
-    borderBottomWidth: 1,
-    borderColor: '#A1C014',
+    backgroundColor: '#2E2E2E',
+    marginVertical: 5,
+    borderRadius: 8,
   },
-};
+  title: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  message: {
+    color: '#FFFFFF',
+    fontSize: 14,
+  },
+  readCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    position: 'absolute',
+    right: 10,
+    top: 10,
+  },
+  readCircleActive: {
+    backgroundColor: '#A1C014',
+  },
+});
 
 export default MessageItem;

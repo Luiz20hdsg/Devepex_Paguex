@@ -1,11 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import SwitchButton from '../components/SwitchButton';
+import { Switch } from 'react-native';
 import Button from '../components/Button';
 import { getNotificationSettings, saveNotificationSettings } from '../api/api';
 import { getData } from '../services/storage';
 import { globalStyles } from '../styles/globalStyles';
+
+const CustomSwitchButton = ({ label, value, onValueChange }) => {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: '#767577', true: '#A1C014' }}
+        thumbColor={value ? '#2E2E2E' : '#f4f3f4'}
+      />
+      <Text style={{ marginLeft: 10, ...globalStyles.text }}>{label}</Text>
+    </View>
+  );
+};
 
 const Settings = ({ navigation }) => {
   const [settings, setSettings] = useState({
@@ -34,18 +48,25 @@ const Settings = ({ navigation }) => {
 
   return (
     <View style={globalStyles.container}>
-      <Text style={styles.title}>Configurações</Text>
-      <Text style={styles.subtitle}>Controle de mensagens</Text>
+      <View style={styles.header}>
+        <View style={styles.iconContainer}>
+          <Icon name="settings" size={24} color="#FFFFFF" />
+        </View>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Configurações</Text>
+          <Text style={styles.subtitle}>Controle de mensagens</Text>
+        </View>
+      </View>
 
       <Text style={styles.sectionTitle}>Boleto bancário</Text>
-      <SwitchButton
+      <CustomSwitchButton
         label="Boleto gerado"
         value={settings.bankBillet.generated}
         onValueChange={(value) =>
           setSettings({ ...settings, bankBillet: { ...settings.bankBillet, generated: value } })
         }
       />
-      <SwitchButton
+      <CustomSwitchButton
         label="Boleto pago"
         value={settings.bankBillet.payed}
         onValueChange={(value) =>
@@ -54,14 +75,14 @@ const Settings = ({ navigation }) => {
       />
 
       <Text style={styles.sectionTitle}>PIX</Text>
-      <SwitchButton
+      <CustomSwitchButton
         label="PIX gerado"
         value={settings.pix.generated}
         onValueChange={(value) =>
           setSettings({ ...settings, pix: { ...settings.pix, generated: value } })
         }
       />
-      <SwitchButton
+      <CustomSwitchButton
         label="PIX pago"
         value={settings.pix.payed}
         onValueChange={(value) =>
@@ -70,14 +91,14 @@ const Settings = ({ navigation }) => {
       />
 
       <Text style={styles.sectionTitle}>Cartão de crédito</Text>
-      <SwitchButton
+      <CustomSwitchButton
         label="Pagamento aprovado"
         value={settings.creditCard.approved}
         onValueChange={(value) =>
           setSettings({ ...settings, creditCard: { ...settings.creditCard, approved: value } })
         }
       />
-      <SwitchButton
+      <CustomSwitchButton
         label="Pagamento recusado"
         value={settings.creditCard.recused}
         onValueChange={(value) =>
@@ -87,44 +108,68 @@ const Settings = ({ navigation }) => {
 
       <Button title="Salvar notificações" onPress={handleSave} style={styles.saveButton} />
 
-      <View style={globalStyles.rectangle}>
-        <Icon
-          name="notifications"
-          size={24}
-          color="#FFFFFF"
-          style={styles.footerButton}
-          onPress={() => navigation.navigate('MessageList')}
-        />
-        <Icon
-          name="menu"
-          size={24}
-          color="#FFFFFF"
-          style={styles.footerButton}
-          onPress={() => navigation.navigate('Menu')}
-        />
-        <Icon
-          name="settings"
-          size={24}
-          color="#FFFFFF"
-          style={styles.footerButton}
-        />
+      {/* Rodapé */}
+      <View style={styles.footer}>
+        <Image source={require('../assets/sublogo01.png')} style={styles.sublogo} />
+        <View style={styles.footerIcons}>
+          <View style={styles.footerButton}>
+            <Icon
+              name="notifications"
+              size={22}
+              color="#FFFFFF"
+              onPress={() => navigation.navigate('MessageList')}
+            />
+          </View>
+          <View style={styles.footerButton}>
+            <Icon
+              name="menu"
+              size={22}
+              color="#FFFFFF"
+              onPress={() => navigation.navigate('Menu')}
+            />
+          </View>
+          <View style={[styles.footerButton, { backgroundColor: '#A1C014' }]}>
+            <Icon
+              name="settings"
+              size={22}
+              color="#1E1E1E"
+              onPress={() => navigation.navigate('Settings')}
+            />
+          </View>
+        </View>
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#2E2E2E',
+    borderColor: '#FFFFFF',
+    borderWidth: 1,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  titleContainer: {
+    marginLeft: 10,
+  },
   title: {
     ...globalStyles.text,
     fontSize: 20,
     fontWeight: '700',
-    textAlign: 'center',
-    marginVertical: 10,
   },
   subtitle: {
     ...globalStyles.text,
     fontSize: 16,
-    textAlign: 'center',
   },
   sectionTitle: {
     ...globalStyles.text,
@@ -136,12 +181,36 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: '#A1C014',
   },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+    backgroundColor: '#2E2E2E',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+  },
+  sublogo: {
+    width: 45,
+    height: 40,
+    resizeMode: 'contain',
+  },
+  footerIcons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
   footerButton: {
-    padding: 10,
+    width: 55,
+    height: 55,
     backgroundColor: '#2E2E2E',
     borderWidth: 1,
-    borderColor: '#A1C014',
+    borderColor: '#FFFFFF',
     borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

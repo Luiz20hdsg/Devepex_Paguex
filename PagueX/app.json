@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "paguex",
     "name": "PagueX",
     "slug": "PagueX",
     "version": "1.0.0",
