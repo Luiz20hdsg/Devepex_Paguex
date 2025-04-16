@@ -1,20 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 import { EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY } from '@env';
-import * as Linking from 'expo-linking';
+
+if (!EXPO_PUBLIC_SUPABASE_URL || !EXPO_PUBLIC_SUPABASE_ANON_KEY) {
+  throw new Error('Variáveis do Supabase não definidas');
+}
 
 const supabase = createClient(EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY);
 
-// mudar isso depois 
-const linkingPrefix = Linking.createURL('/');
-
 export const sendAuthCode = async (email) => {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    console.error('Email inválido:', email);
+    return false;
+  }
   try {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${linkingPrefix}auth/verify`, // não iremos utilizar mais o link direto
-      },
-    });
+    const { error } = await supabase.auth.signInWithOtp({ email });
     if (error) throw error;
     console.log('Código enviado com sucesso para:', email);
     return true;
@@ -31,24 +30,16 @@ export const verifyAuthCode = async (email, token) => {
       token,
       type: 'email',
     });
-    if (error) throw error;
+    if (error) {
+      const message = error.code === 'invalid_token'
+        ? 'Código inválido ou expirado'
+        : `Erro ao verificar código: ${error.message}`;
+      throw new Error(message);
+    }
     console.log('Autenticação bem-sucedida:', data);
-    return data.session; // retorna a sessão com access_token
+    return data.session;
   } catch (error) {
-    console.error('Erro ao verificar código:', error.message);
-    return null;
-  }
-};
-
-// função para verificar autenticação via link
-export const handleDeepLinkAuth = async (url) => {
-  try {
-    const { data, error } = await supabase.auth.getSessionFromUrl(url);
-    if (error) throw error;
-    console.log('Autenticação via link bem-sucedida:', data);
-    return data.session; 
-  } catch (error) {
-    console.error('Erro ao autenticar via link:', error.message);
+    console.error(error.message);
     return null;
   }
 };

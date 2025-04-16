@@ -1,14 +1,24 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { markMessageAsRead } from '../api/api';
 
 const MessageItem = ({ message, onUpdate }) => {
+  const handleUpdate = async () => {
+    try {
+      await markMessageAsRead(message.id);
+      onUpdate();
+    } catch (error) {
+      console.error('Erro ao marcar mensagem como lida:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{message.title}</Text>
       <Text style={styles.message}>{message.message}</Text>
       <TouchableOpacity
         style={[styles.readCircle, message.readed ? styles.readCircleActive : null]}
-        onPress={onUpdate}
+        onPress={handleUpdate}
       />
     </View>
   );

@@ -1,61 +1,91 @@
 import axios from 'axios';
+import { STATIC_AUTHORIZATION_TOKEN, EXPO_PUBLIC_API_URL } from '@env';
+
+if (!STATIC_AUTHORIZATION_TOKEN) {
+  throw new Error('STATIC_AUTHORIZATION_TOKEN não definido');
+}
 
 const api = axios.create({
-  baseURL: 'https://api.paguex.com',
+  baseURL: EXPO_PUBLIC_API_URL || 'https://mobile.devepex.com',
+  headers: {
+    Authorization: `Bearer ${STATIC_AUTHORIZATION_TOKEN}`,
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000, 
 });
-
-const API_BASE_URL = 'https://api.paguex.com'; 
 
 export const registerDevice = async (email, deviceId) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/auth`, {
-      email,
-      device_ID: deviceId,
-    });
-    console.log('Dispositivo registrado com sucesso:', response.data);
-  } catch (error) {
-    throw new Error(`Erro ao registrar dispositivo: ${error.message}`);
-  }
-};
-
-export const getMessages = async (email, startDate, endDate, page = 1) => {
-  try {
-    const response = await api.get('/messages', {
-      params: { user: email, data_inicio: startDate, data_fim: endDate, page },
-    });
+    const response = await api.post('/user/create', { email, device_id: deviceId });
+    console.log('Dispositivo registrado:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Erro ao buscar mensagens:', error);
+    console.error('Erro ao registrar dispositivo:', {
+      message: error.message,
+      response: error.response ? error.response.data : null,
+      status: error.response ? error.response.status : null,
+    });
     throw error;
   }
 };
 
-export const markMessageAsRead = async (messageId) => {
+export const getMessages = async (email, startDate, endDate, page) => {
   try {
-    await api.put(`/messages/${messageId}`, { id: messageId });
+    const response = await api.get(`/messages/list/${email}/${startDate}/${endDate}/${page}`);
+    console.log('Mensagens recebidas:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar mensagens:', {
+      message: error.message,
+      response: error.response ? error.response.data : null,
+      status: error.response ? error.response.status : null,
+      config: { url: error.config?.url },
+    });
+    throw error;
+  }
+};
+
+export const markMessageAsRead = async (id) => {
+  try {
+    await api.put(`/messages/update/${id}`, { id });
+    console.log(`Mensagem ${id} marcada como lida`);
     return true;
   } catch (error) {
-    console.error('Erro ao marcar mensagem como lida:', error);
+    console.error('Erro ao marcar mensagem como lida:', {
+      message: error.message,
+      response: error.response ? error.response.data : null,
+      status: error.response ? error.response.status : null,
+    });
     throw error;
   }
 };
 
 export const getNotificationSettings = async (email) => {
   try {
-    const response = await api.get('/settings', { params: { user: email } });
+    const response = await api.get(`/user/settings/${email}`);
+    console.log('Configurações recebidas:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Erro ao buscar configurações:', error);
+    console.error('Erro ao buscar configurações:', {
+      message: error.message,
+      response: error.response ? error.response.data : null,
+      status: error.response ? error.response.status : null,
+    });
     throw error;
   }
 };
 
-export const saveNotificationSettings = async (settings) => {
+export const saveNotificationSettings = async (email, settings) => {
   try {
-    await api.put('/settings', settings);
+    await api.put(`/user/settings/${email}`, settings);
+    console.log('Configurações salvas');
     return true;
   } catch (error) {
-    console.error('Erro ao salvar configurações:', error);
+    console.error('Erro ao salvar configurações:', {
+      message: error.message,
+      response: error.response ? error.response.data : null,
+      status: error.response ? error.response.status : null,
+    });
     throw error;
   }
 };

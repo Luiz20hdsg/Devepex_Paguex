@@ -32,13 +32,8 @@ const Login02 = ({ navigation }) => {
         await saveData('device_id', deviceId);
         await saveData('email', email);
 
-        try {
-          await registerDevice(email, deviceId);
-        } catch (error) {
-          console.error('Erro ao registrar dispositivo ignorado:', error.message);
-        }
-
-        navigation.replace('MessageList'); 
+        await registerDevice(email, deviceId);
+        navigation.replace('MessageList'); // Usa replace para evitar voltar ao login
       } else {
         alert('Código inválido ou expirado');
       }

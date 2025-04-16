@@ -1,29 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import MessageItem from '../components/MessageItem';
-import { getMessages } from '../api/api';
+import { getMessages, markMessageAsRead } from '../api/api';
 import { getData } from '../services/storage';
 import { globalStyles } from '../styles/globalStyles';
+
+const { width, height } = Dimensions.get('window');
 
 const MessageList = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(1);
   const [range, setRange] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchMessages = async (days = 1, newPage = 1) => {
-    const email = await getData('email');
-    const endDate = new Date().toISOString().split('T')[0];
-    const startDate = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
     try {
+      setLoading(true);
+      const email = await getData('email');
+      if (!email) {
+        console.error('Email não encontrado');
+        navigation.replace('Login01');
+        return;
+      }
+
+      const endDate = new Date().toISOString().split('T')[0];
+      const startDate = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
+
+      console.log('Buscando mensagens:', { email, startDate, endDate, page: newPage });
       const data = await getMessages(email, startDate, endDate, newPage);
+      
       if (data) {
         setMessages(newPage === 1 ? data.messages : [...messages, ...data.messages]);
-        setHasNextPage(data.nextPage);
+        setHasNextPage(data.nextPage || false);
+        if (data.messages.length === 0 && newPage === 1) {
+          console.log('Nenhuma mensagem encontrada para o período');
+        }
       }
     } catch (error) {
-      console.error('Erro ao carregar mensagens:', error);
+      console.error('Erro ao carregar mensagens:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,20 +60,37 @@ const MessageList = ({ navigation }) => {
   };
 
   const loadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchMessages(range, nextPage);
+    if (!loading && hasNextPage) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchMessages(range, nextPage);
+    }
+  };
+
+  const handleMessagePress = async (id) => {
+    try {
+      await markMessageAsRead(id);
+      setMessages(messages.map((msg) =>
+        msg.id === id ? { ...msg, readed: true } : msg
+      ));
+    } catch (error) {
+      console.error('Erro ao marcar mensagem como lida:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+    }
   };
 
   return (
     <View style={globalStyles.container}>
       <View style={styles.header}>
-        <View style={styles.iconContainer}>
-          <Icon name="notifications" size={24} color="#FFFFFF" />
+        <View style={[styles.iconContainer, { width: width * 0.1, height: width * 0.1 }]}>
+          <Icon name="notifications" size={width * 0.06} color="#FFFFFF" />
         </View>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Lista de mensagens</Text>
-        </View>
+          <Text style={[styles.title, { fontSize: width * 0.045 }]}>Lista de mensagens</Text>
+        </View>   
       </View>
 
       <View style={styles.filterContainer}>
@@ -74,6 +113,7 @@ const MessageList = ({ navigation }) => {
         renderItem={({ item }) => (
           <MessageItem
             message={item}
+            onPress={() => handleMessagePress(item.id)}
             onUpdate={() => {
               const updatedMessages = messages.map((msg) =>
                 msg.id === item.id ? { ...msg, readed: true } : msg
@@ -103,7 +143,7 @@ const MessageList = ({ navigation }) => {
           <View style={[styles.footerButton, { backgroundColor: '#A1C014' }]}>
             <Icon
               name="notifications"
-              size={22}
+              size={width * 0.055}
               color="#1E1E1E"
               onPress={() => navigation.navigate('MessageList')}
             />
@@ -111,7 +151,7 @@ const MessageList = ({ navigation }) => {
           <View style={styles.footerButton}>
             <Icon
               name="menu"
-              size={22}
+              size={width * 0.055}
               color="#FFFFFF"
               onPress={() => navigation.navigate('Menu')}
             />
@@ -119,7 +159,7 @@ const MessageList = ({ navigation }) => {
           <View style={styles.footerButton}>
             <Icon
               name="settings"
-              size={22}
+              size={width * 0.055}
               color="#FFFFFF"
               onPress={() => navigation.navigate('Settings')}
             />
@@ -134,72 +174,75 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 10,
+    marginVertical: height * 0.02,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
     backgroundColor: '#2E2E2E',
     borderColor: '#FFFFFF',
     borderWidth: 1,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 10,
+    marginLeft: width * 0.025,
   },
   titleContainer: {
-    marginLeft: 10,
+    marginLeft: width * 0.025,
   },
   title: {
     ...globalStyles.text,
-    fontSize: 20,
     fontWeight: '700',
   },
   filterContainer: {
     flexDirection: 'row',
-    marginLeft: 10,
-    gap: 6,
-    marginVertical: 10,
+    marginLeft: width * 0.025,
+    gap: width * 0.02,
+    marginTop: height * 0.005, // diminui o espaçamento entre o header e os botões
+    marginBottom: height * 0.02,
   },
   filter: {
-    width: 70,
-    height: 30,
+    width: width * 0.2,
+    height: height * 0.045,
     borderWidth: 1,
     borderColor: '#FFFFFF',
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#2E2E2E',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5, // adiciona uma sombra aos botões
   },
   activeFilter: {
     backgroundColor: '#FFFFFF',
   },
   filterText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: width * 0.04,
   },
   activeFilterText: {
     color: '#2E2E2E',
-    fontSize: 16,
+    fontSize: width * 0.04,
   },
   messageList: {
-    paddingBottom: 100,
+    paddingBottom: height * 0.1,
   },
   loadMoreButton: {
-    width: 281,
-    height: 40,
+    width: width * 0.7,
+    height: height * 0.06,
     backgroundColor: '#535353',
     borderWidth: 1,
     borderColor: '#FFFFFF',
     borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: height * 0.02,
+    paddingHorizontal: width * 0.04,
     alignSelf: 'center',
-    marginVertical: 20,
+    marginVertical: height * 0.03,
   },
   loadMoreButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: width * 0.04,
     textAlign: 'center',
   },
   footer: {
@@ -207,28 +250,28 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 80,
+    height: height * 0.08, 
     backgroundColor: '#2E2E2E',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: width * 0.025,
   },
   sublogo: {
-    width: 45,
-    height: 40,
+    width: width * 0.12, 
+    height: height * 0.06, 
     resizeMode: 'contain',
   },
   footerIcons: {
     flexDirection: 'row',
-    gap: 10,
+    gap: width * 0.0125,
   },
   footerButton: {
-    width: 55,
-    height: 55,
+    width: width * 0.12, 
+    height: width * 0.12, 
     backgroundColor: '#2E2E2E',
     borderWidth: 1,
-    borderColor: '#FFFFFF',
+    borderColor: '#A1C014', 
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -236,5 +279,3 @@ const styles = StyleSheet.create({
 });
 
 export default MessageList;
-
-//teste
