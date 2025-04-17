@@ -25,12 +25,13 @@ const MessageList = ({ navigation }) => {
         return;
       }
 
+      // Ensure dates are in YYYY-MM-DD format
       const endDate = new Date().toISOString().split('T')[0];
       const startDate = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
 
       console.log('Buscando mensagens:', { email, startDate, endDate, page: newPage });
       const data = await getMessages(email, startDate, endDate, newPage);
-      
+
       if (data) {
         setMessages(newPage === 1 ? data.messages : [...messages, ...data.messages]);
         setHasNextPage(data.nextPage || false);
@@ -56,7 +57,7 @@ const MessageList = ({ navigation }) => {
   const handleRangeChange = (days) => {
     setRange(days);
     setPage(1);
-    fetchMessages(days);
+    fetchMessages(days, 1);
   };
 
   const loadMore = () => {
@@ -90,7 +91,7 @@ const MessageList = ({ navigation }) => {
         </View>
         <View style={styles.titleContainer}>
           <Text style={[styles.title, { fontSize: width * 0.045 }]}>Lista de mensagens</Text>
-        </View>   
+        </View>
       </View>
 
       <View style={styles.filterContainer}>
@@ -127,7 +128,6 @@ const MessageList = ({ navigation }) => {
         ListFooterComponent={
           hasNextPage ? (
             <TouchableOpacity
-              title="Mais..."
               onPress={loadMore}
               style={styles.loadMoreButton}
             >
@@ -170,6 +170,7 @@ const MessageList = ({ navigation }) => {
   );
 };
 
+// Styles remain unchanged
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginLeft: width * 0.025,
     gap: width * 0.02,
-    marginTop: height * 0.005, // diminui o espaçamento entre o header e os botões
+    marginTop: height * 0.005,
     marginBottom: height * 0.02,
   },
   filter: {
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5, // adiciona uma sombra aos botões
+    elevation: 5,
   },
   activeFilter: {
     backgroundColor: '#FFFFFF',
@@ -230,27 +231,31 @@ const styles = StyleSheet.create({
   },
   loadMoreButton: {
     width: width * 0.7,
-    height: height * 0.06,
+    height: height * 0.08, 
     backgroundColor: '#535353',
     borderWidth: 1,
     borderColor: '#FFFFFF',
     borderRadius: 8,
-    paddingVertical: height * 0.02,
+    paddingVertical: height * 0.015, 
     paddingHorizontal: width * 0.04,
     alignSelf: 'center',
     marginVertical: height * 0.03,
+    justifyContent: 'center', 
+    alignItems: 'center', 
   },
   loadMoreButtonText: {
     color: '#FFFFFF',
     fontSize: width * 0.04,
     textAlign: 'center',
+    fontWeight: '600', 
+    lineHeight: width * 0.05, 
   },
   footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: height * 0.08, 
+    height: height * 0.08,
     backgroundColor: '#2E2E2E',
     flexDirection: 'row',
     alignItems: 'center',
@@ -258,8 +263,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: width * 0.025,
   },
   sublogo: {
-    width: width * 0.12, 
-    height: height * 0.06, 
+    width: width * 0.12,
+    height: height * 0.06,
     resizeMode: 'contain',
   },
   footerIcons: {
@@ -267,11 +272,11 @@ const styles = StyleSheet.create({
     gap: width * 0.0125,
   },
   footerButton: {
-    width: width * 0.12, 
-    height: width * 0.12, 
+    width: width * 0.12,
+    height: width * 0.12,
     backgroundColor: '#2E2E2E',
     borderWidth: 1,
-    borderColor: '#A1C014', 
+    borderColor: '#A1C014',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',

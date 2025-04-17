@@ -5,7 +5,7 @@ import Button from '../components/Button';
 import { verifyAuthCode } from '../services/auth';
 import { getDeviceId } from '../services/onesignal';
 import { saveData, getData } from '../services/storage';
-import { registerDevice } from '../api/api';
+import { registerDevice } from '../api/api'; // Ensure correct import
 import { globalStyles } from '../styles/globalStyles';
 
 const { width, height } = Dimensions.get('window');
@@ -32,8 +32,13 @@ const Login02 = ({ navigation }) => {
         await saveData('device_id', deviceId);
         await saveData('email', email);
 
-        await registerDevice(email, deviceId);
-        navigation.replace('MessageList'); // Usa replace para evitar voltar ao login
+        // Call registerDevice and handle response
+        const response = await registerDevice(email, deviceId);
+        if (response.message === 'Usuário criado com sucesso') {
+          navigation.replace('MessageList');
+        } else {
+          alert('Erro ao registrar dispositivo. Tente novamente.');
+        }
       } else {
         alert('Código inválido ou expirado');
       }
@@ -66,6 +71,7 @@ const Login02 = ({ navigation }) => {
   );
 };
 
+// Styles remain unchanged
 const styles = StyleSheet.create({
   container: {
     flex: 1,

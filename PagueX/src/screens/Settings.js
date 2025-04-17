@@ -26,7 +26,14 @@ const Settings = ({ navigation }) => {
           return;
         }
         const data = await getNotificationSettings(email);
-        if (data) setSettings(data);
+        if (data) {
+          // Ensure default values if API returns partial data
+          setSettings({
+            bankBillet: { generated: false, payed: false, ...data.bankBillet },
+            pix: { generated: false, payed: false, ...data.pix },
+            creditCard: { approved: false, recused: false, ...data.creditCard },
+          });
+        }
       } catch (error) {
         console.error('Erro ao carregar configurações:', error);
         alert('Erro ao carregar configurações. Tente novamente.');
@@ -43,12 +50,8 @@ const Settings = ({ navigation }) => {
         navigation.replace('Login01');
         return;
       }
-      const success = await saveNotificationSettings(email, settings);
-      if (success) {
-        alert('Configurações salvas com sucesso!');
-      } else {
-        alert('Erro ao salvar configurações.');
-      }
+      await saveNotificationSettings(email, settings);
+      alert('Configurações salvas com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar configurações:', error);
       alert('Erro ao salvar configurações. Tente novamente.');
@@ -65,7 +68,7 @@ const Settings = ({ navigation }) => {
           <Text style={[styles.title, { fontSize: width * 0.045 }]}>Configurações</Text>
           <Text style={[styles.subtitle, { fontSize: width * 0.04 }]}>Controle de mensagens</Text>
         </View>
-    </View>
+      </View>
 
       <View style={styles.configContainer}>
         <Text style={[styles.sectionTitle, { marginTop: height * 0.025 }]}>Boleto bancário</Text>
@@ -176,6 +179,7 @@ const Settings = ({ navigation }) => {
   );
 };
 
+// Styles remain unchanged
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
@@ -241,7 +245,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: height * 0.08, 
+    height: height * 0.08,
     backgroundColor: '#2E2E2E',
     flexDirection: 'row',
     alignItems: 'center',
@@ -249,8 +253,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: width * 0.025,
   },
   sublogo: {
-    width: width * 0.12, 
-    height: height * 0.06, 
+    width: width * 0.12,
+    height: height * 0.06,
     resizeMode: 'contain',
   },
   footerIcons: {
@@ -258,11 +262,11 @@ const styles = StyleSheet.create({
     gap: width * 0.0125,
   },
   footerButton: {
-    width: width * 0.12, 
-    height: width * 0.12, 
+    width: width * 0.12,
+    height: width * 0.12,
     backgroundColor: '#2E2E2E',
     borderWidth: 1,
-    borderColor: '#A1C014', 
+    borderColor: '#A1C014',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
